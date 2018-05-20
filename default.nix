@@ -12,33 +12,35 @@ let
     sha256 = "1yhzklq58816kik9w8xss481wf9mk8mi9sfvk03ghdxi2q0fi0ci";
   };
 
-  #staticDeps = import ./static-deps.nix { inherit pkgs; };
   overlays = [ import ./static-overlay.nix ];
 
 in {
 
   build = pkgs.lib.genAttrs systems (system:
     let
-      pkgs = import nixpkgs {
-        inherit system;
-        config.packageOverrides = import ./static-override.nix;
-      };
-      #pkgs = import nixpkgs { inherit overlays system; };
+      pkgs = import nixpkgs { inherit system; };
+      staticPkgs = import ./static-packages.nix { inherit pkgs; };
+
       inherit (pkgs) lib stdenv;
 
     in stdenv.mkDerivation rec {
       name = "nix";
       src = nix;
 
-      buildInputs = with pkgs;
-        [ curl
-          bzip2 xz brotli
-          openssl pkgconfig sqlite boehmgc
+      buildInputs = with staticPkgs;
+        [ boehmgc
           boost
+          brotli
+          bzip2
+          curl
+          openssl
+          sqlite
+          xz
 
-          # Tests
-          git
-          mercurial
+          # Non-static dependencies
+          pkgs.git
+          pkgs.mercurial
+          pkgs.pkgconfig
         ]
         ++ lib.optional stdenv.isLinux libseccomp
         ++ lib.optionals (stdenv.isLinux || stdenv.isDarwin) [ aws-sdk-cpp libsodium ];
@@ -64,8 +66,5 @@ in {
     });
 
   # Lets us build individual dependencies
-  pkgs = import nixpkgs {
-    system = builtins.currentSystem or "x86_64-linux";
-    config.packageOverrides = import ./static-override.nix;
-  };
+  pkgs = import ./static-packages.nix { inherit pkgs; };
 }
