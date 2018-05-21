@@ -73,6 +73,7 @@ in {
       makeFlags = [
         "BUILD_SHARED_LIBS=0"
         "LDFLAGS=-static"
+        "GLOBAL_LDFLAGS=-static -lnghttp2 -lssl -lcrypto"
       ];
 
       doCheck = false;
