@@ -67,6 +67,19 @@ let
       gssSupport = false;
     });
 
+    libiconv =
+      if pkgs.hostPlatform.isDarwin
+        then pkgs.darwin.libiconv.overrideAttrs (oldArgs: {
+          dontDisableStatic = true;
+          doCheck = false;
+
+          configureFlags = ["--disable-shared" "--enable-static"];
+
+          # Don't need to do things with dylibs
+          postInstall = "";
+        })
+      else makeStatic pkgs.libiconv;
+
     libssh2 = makeStatic (pkgs.libssh2.override {
       inherit (pkgset) openssl zlib;
     });
@@ -94,7 +107,6 @@ let
     brotli = makeStatic pkgs.brotli;
     expat = makeStatic pkgs.expat;
     icu = makeStatic pkgs.icu;
-    libiconv = makeStatic pkgs.libiconv;
     libseccomp = makeStatic pkgs.libseccomp;
     libsodium = makeStatic pkgs.libsodium;
     sqlite = makeStatic pkgs.sqlite;

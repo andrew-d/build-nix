@@ -14,8 +14,6 @@ let
     sha256 = "1invpfvlmklkgrbh2p3asybknxrnb9h3vpnxgpr1k2hfsxkm2gsn";
   };
 
-  overlays = [ import ./static-overlay.nix ];
-
 in {
 
   build = pkgs.lib.genAttrs systems (system:
