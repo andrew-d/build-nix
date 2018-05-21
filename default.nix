@@ -70,6 +70,11 @@ in {
 
       preBuild = "unset NIX_INDENT_MAKE";
 
+      makeFlags = [
+        "BUILD_SHARED_LIBS=0"
+        "LDFLAGS=-static"
+      ];
+
       doCheck = false;
 
       installFlags = "sysconfdir=$(out)/etc";
