@@ -5,11 +5,13 @@
 let
   pkgs = import nixpkgs { system = builtins.currentSystem or "x86_64-linux"; };
 
-  nix = pkgs.fetchFromGitHub {
-    owner  = "NixOS";
-    repo   = "nix";
+  version = "2.1";
+  nix = pkgs.fetchgit { #pkgs.fetchFromGitHub {
+    #owner  = "NixOS";
+    #repo   = "nix";
+    url    = "https://github.com/NixOS/nix.git";
     rev    = "966407bcf1cf86de508b20fef43cffb81d8a87dc";
-    sha256 = "1yhzklq58816kik9w8xss481wf9mk8mi9sfvk03ghdxi2q0fi0ci";
+    sha256 = "1invpfvlmklkgrbh2p3asybknxrnb9h3vpnxgpr1k2hfsxkm2gsn";
   };
 
   overlays = [ import ./static-overlay.nix ];
@@ -26,6 +28,22 @@ in {
     in stdenv.mkDerivation rec {
       name = "nix";
       src = nix;
+      #src = tarball;
+
+      nativeBuildInputs = with pkgs; [
+        autoconf-archive
+        autoreconfHook
+        bison
+        docbook5
+        docbook5_xsl
+        flex
+        git
+        help2man
+        libxml2
+        libxslt
+        mercurial
+        pkgconfig
+      ];
 
       buildInputs = with staticPkgs;
         [ boehmgc
@@ -36,14 +54,9 @@ in {
           openssl
           sqlite
           xz
-
-          # Non-static dependencies
-          pkgs.git
-          pkgs.mercurial
-          pkgs.pkgconfig
         ]
-        ++ lib.optional stdenv.isLinux libseccomp
-        ++ lib.optionals (stdenv.isLinux || stdenv.isDarwin) [ aws-sdk-cpp libsodium ];
+        ++ pkgs.lib.optional pkgs.stdenv.isLinux libseccomp
+        ++ pkgs.lib.optionals (pkgs.stdenv.isLinux || pkgs.stdenv.isDarwin) [ aws-sdk-cpp libsodium ];
 
       configureFlags =
         [ "--disable-init-state"

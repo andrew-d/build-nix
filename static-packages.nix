@@ -30,6 +30,8 @@ let
       customMemoryManagement = false;
 
     }).overrideAttrs (oldArgs: {
+      separateDebugInfo = false;
+
       cmakeFlags = oldArgs.cmakeFlags ++ [
         "-DBUILD_SHARED_LIBS=OFF"
         "-DENABLE_TESTING=OFF"
@@ -76,6 +78,7 @@ let
     openssl = pkgs.openssl.overrideAttrs (oldArgs: {
       dontDisableStatic = true;
       doCheck = false;
+      separateDebugInfo = false;
 
       configureFlags = lib.remove "shared" oldArgs.configureFlags ++ [
         "no-shared"
